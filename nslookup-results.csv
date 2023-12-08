@@ -13,7 +13,6 @@ linkedin.com,13.107.42.14,2015
 doubleclick.net,142.250.190.78,315
 live.com,204.79.197.212,2015
 wikipedia.org,208.80.154.224,2170
-domaincontrol.com,0,0
 fastly.net,151.101.1.6,2170
 bing.com,13.107.21.200,2015
 wordpress.org,198.143.164.252,315
@@ -26,7 +25,7 @@ spotify.com,35.186.224.25,705
 adobe.com,23.202.90.7,10
 vimeo.com,162.159.128.61,2170
 gandi.net,217.70.185.65,3905
-sharepoint.com,13.107.9.168,-1
+sharepoint.com,13.107.9.168,NC
 zoom.us,170.114.52.2,2150
 wordpress.com,192.0.78.9,2170
 bit.ly,67.199.248.10,400

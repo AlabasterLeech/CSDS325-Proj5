@@ -31,7 +31,7 @@ with open('tranco-20231113.csv', newline='') as csvfile:
         if(sitesTested >= SITES_TO_TEST = 1000):
             break
         traceResult = tracer(line[1])
-        if traceResult > MIN_LINES_GOOD_TRACE and MAX_LINES_GOOD_TRACE < 30:
+        if traceResult > MIN_LINES_GOOD_TRACE and traceResult < MAX_LINES_GOOD_TRACE:
             candidatesAccepted.append(line[1])
             print('Candidate accepted')
         else:
