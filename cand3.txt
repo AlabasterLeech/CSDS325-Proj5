@@ -13,7 +13,6 @@ linkedin.com
 doubleclick.net
 live.com
 wikipedia.org
-domaincontrol.com
 fastly.net
 bing.com
 wordpress.org

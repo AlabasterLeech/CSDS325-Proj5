@@ -15,7 +15,7 @@ import scipy
 
 SINGLE_SITE = 'adobe.com'
 SHOW_FIGS = True
-MAKE_FIGS = [False, False, True]
+MAKE_FIGS = [False, False, False, True, True]
 
 WEEKDAY_DICT = { #0 = Monday, 6 = Sunday
     "11-28":1,
@@ -30,15 +30,75 @@ WEEKDAY_DICT = { #0 = Monday, 6 = Sunday
     "12-07":3
     }
 
+DOMAIN_DICT = {
+    "google.com":0,
+    "amazonaws.com":1,
+    "facebook.com":2,
+    "microsoft.com":3,
+    "apple.com":4,
+    "youtube.com":5,
+    "twitter.com":6,
+    "azure.com":7,
+    "cloudflare.com":8,
+    "gstatic.com":9,
+    "digicert.com":10,
+    "linkedin.com":11,
+    "doubleclick.net":12,
+    "live.com":13,
+    "wikipedia.org":14,
+    "fastly.net":15,
+    "bing.com":16,
+    "wordpress.org":17,
+    "yahoo.com":18,
+    "pinterest.com":19,
+    "github.com":20,
+    "ui.com":21,
+    "tiktokv.com":22,
+    "spotify.com":23,
+    "adobe.com":24,
+    "vimeo.com":25,
+    "gandi.net":26,
+    "sharepoint.com":27,
+    "zoom.us":28,
+    "wordpress.com":29,
+    "bit.ly":30,
+    "qq.com":31,
+    "msn.com":32,
+    "app-measurement.com":33,
+    "yandex.ru":34,
+    "blogspot.com":35,
+    "whatsapp.net":36,
+    "cloudflare.net":37,
+    "skype.com":38,
+    "nic.ru":39,
+    "reddit.com":40,
+    "roblox.com":41,
+    "opera.com":42,
+    "snapchat.com":43,
+    "criteo.com":44,
+    "dropbox.com":45,
+    "baidu.com":46,
+    "intuit.com":47,
+    "icir.org":48,
+    }
+
 dataMaster = []
+x = 0
 with open('main-data.csv',newline = '') as csvfile:
     datareader = csv.reader(csvfile, delimiter=',', quotechar = '|')
     for line in datareader:
         if(line[2] != 'domaincontrol.com'):
-            dataMaster.append(tuple([line[0],line[1],line[2],int(line[3])]))
+            if(line[1][14:16] == '00' and int(line[0][14:16]) > 50):
+                duration = float(line[1][17:]) + 60*(60+float(line[1][14:16])) - (float(line[0][17:]) + 60*float(line[0][14:16]))
+            else:
+                duration = float(line[1][17:]) + 60*+float(line[1][14:16]) - (float(line[0][17:]) + 60*float(line[0][14:16]))
+            dataMaster.append(tuple([line[0],line[1],line[2],int(line[3]),duration]))
 
-
-
+dataDist = []
+with open('nslookup-results.csv', newline='') as csvfile:
+    reader = csv.reader(csvfile, delimiter=',', quotechar = '|')
+    for line in reader:
+        dataDist.append(tuple([line[0], line[1], line[2]]))
 
 if(MAKE_FIGS[0]):
     hourTotals = [0]*24
@@ -74,9 +134,6 @@ if(MAKE_FIGS[1]):
     for x in range(24):
         hourAvgs[x] = hourTotals[x]/hourCounts[x]
 
-    print(hourCounts)
-    print(hourTotals)
-
     figTODPlot, axTODPlot = plt.subplots()
     axTODPlot.scatter(range(24), hourAvgs)
     axTODPlot.set_xlim([0,23])
@@ -108,6 +165,42 @@ if(MAKE_FIGS[2]):
     axDOWPlot.set_xticks([0,1,2,3,4,5,6],["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday", "Sunday"], rotation=20)
     dowR = scipy.stats.pearsonr(weekdayAvgs, range(7))
     print(dowR)
+
+if(MAKE_FIGS[3]):
+    domainTotals = [0]*49
+    domainCounts = [0]*49
+    domainAvgs = [0]*49
+    domainAvgsGoodDist = []
+
+    for entry in dataMaster:
+        domainTotals[DOMAIN_DICT[entry[2]]] += entry[3]
+        domainCounts[DOMAIN_DICT[entry[2]]] += 1
+    for x in range(49):
+        domainAvgs[x] = domainTotals[x]/domainCounts[x]
+
+        print(dataMaster[x][2] + "," + str(domainAvgs[x]))
+        
+        if(dataDist[x][2] != 'NC'):
+            domainAvgsGoodDist.append(domainAvgs[x])
+
+    
+
+    figDistPlot, axDistPlot = plt.subplots()
+    axDistPlot.scatter([int(x[2]) for x in dataDist if x[2] != 'NC'], domainAvgsGoodDist)
+    axDistPlot.set_title("Average tracert Hops vs. Physical Distance")
+    axDistPlot.set_xlabel("Physical Distance From Desktop (miles)")
+    axDistPlot.set_ylabel("Average number of hops")
+    distR = scipy.stats.pearsonr([int(x[2]) for x in dataDist if x[2] != 'NC'], domainAvgsGoodDist)
+    print(distR)
+
+if(MAKE_FIGS[4]):
+    figTimePlot, axTimePlot = plt.subplots()
+    axTimePlot.scatter([x[3] for x in dataMaster], [x[4] for x in dataMaster], s = 1)
+    axTimePlot.set_title("Duration of tracert vs. Number of Hops in Route")
+    axTimePlot.set_xlabel("Number of Hops")
+    axTimePlot.set_ylabel("Time Elapsed")
+    timeR = scipy.stats.pearsonr([x[3] for x in dataMaster], [x[4] for x in dataMaster])
+    print(timeR)
 
 if(SHOW_FIGS):
     plt.show()
